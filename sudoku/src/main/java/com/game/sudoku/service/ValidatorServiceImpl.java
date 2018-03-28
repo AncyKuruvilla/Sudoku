@@ -50,18 +50,38 @@ public class ValidatorServiceImpl implements ValidatorService{
         if(row.size()!= 9){
             return false;
         }
+
         int sum = row.stream().filter(value->value <10 && value > 0)
                 .distinct().limit(9)
                 .reduce(0, Integer::sum);
-
+        System.out.print(" ");
         return sum == 45;
     }
 
-    //TODO:validate block
-    private boolean validateBlock(){
-        for(int i=0;i<9;i++){
-
+    boolean validateBlock(List<List<Integer>> grid){
+        boolean checkValidity = true;
+        int startRowIndex= 0;
+        int startColumnIndex = 0;
+        for(int i=startRowIndex;i < grid.size();i+=3){
+            for(int j= startColumnIndex;j <grid.size();j+=3) {
+                checkValidity = validateBlock(grid,i,j);
+                if(!checkValidity)
+                    return checkValidity;
+            }
         }
-        return true;
+        return checkValidity;
+    }
+
+    private boolean validateBlock(List<List<Integer>> grid, int startRowIndex, int startColumnIndex){
+        List<Integer> block = new ArrayList<>();
+        boolean checkValidity = true;
+        int endRowIndex = startRowIndex + 3;
+        int endColumnIndex = startColumnIndex +3;
+        for(int i= startRowIndex;i < endRowIndex; i++){
+            for(int j= startColumnIndex; j< endColumnIndex; j++){
+                block.add(grid.get(i).get(j));
+            }
+        }
+        return validate(block);
     }
 }
