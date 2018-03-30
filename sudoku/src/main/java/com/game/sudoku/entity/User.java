@@ -3,7 +3,7 @@ package com.game.sudoku.entity;
 import javax.persistence.*;
 
 /**
- * Created by jino-ancy on 20-03-2018.
+ * User
  */
 
 @Entity
@@ -14,11 +14,7 @@ public class User {
     private String name;
     private String email;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    public int getId() {
+        return Id;
     }
 }

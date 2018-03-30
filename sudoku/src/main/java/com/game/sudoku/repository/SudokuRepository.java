@@ -3,9 +3,20 @@ package com.game.sudoku.repository;
 import com.game.sudoku.entity.Sudoku;
 
 /**
- * Created by jino-ancy on 20-03-2018.
+ * Sudoku Repository
  */
 public interface SudokuRepository {
+    /**
+     * to find the sudoku by Id
+     * @param Id
+     * @return @{@link Sudoku} object
+     */
     Sudoku findById(int Id);
-    Sudoku insert(Sudoku sudoku);
+
+    /**
+     * add a sudoku in the DB
+     * @param sudoku
+     * @return @{@link Sudoku} object
+     */
+    Sudoku addOrUpdate(Sudoku sudoku);
 }

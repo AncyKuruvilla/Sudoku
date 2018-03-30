@@ -8,17 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jino-ancy on 11-03-2018.
+ * Validator Service Implementation
  */
 @Service
 public class ValidatorServiceImpl implements ValidatorService{
     private static Logger LOGGER = LoggerFactory.getLogger(ValidatorServiceImpl.class);
 
-    /**
-     * Validating Grid
-     * @param grid
-     * @return
-     */
     @Override
     public boolean validateGrid(List<List<Integer>> grid) {
         LOGGER.info("Validating the grid");
@@ -43,10 +38,10 @@ public class ValidatorServiceImpl implements ValidatorService{
      * check if the row contain value from 1-9
      * check if row contain unique value
      * @param row
-     * @return
+     * @return @boolean
      */
     private boolean validate(List<Integer> row){
-        LOGGER.info("Validating row");
+        LOGGER.info("Validating row and column");
         if(row.size()!= 9){
             return false;
         }
@@ -58,7 +53,13 @@ public class ValidatorServiceImpl implements ValidatorService{
         return sum == 45;
     }
 
-    boolean validateBlock(List<List<Integer>> grid){
+    /**
+     * validating all the blocks of the sudoku grid
+     * @param grid
+     * @return @boolean
+     */
+    private boolean validateBlock(List<List<Integer>> grid){
+        LOGGER.info("Validating block");
         boolean checkValidity = true;
         int startRowIndex= 0;
         int startColumnIndex = 0;
@@ -72,7 +73,14 @@ public class ValidatorServiceImpl implements ValidatorService{
         return checkValidity;
     }
 
-    private boolean validateBlock(List<List<Integer>> grid, int startRowIndex, int startColumnIndex){
+    /**
+     * Validating individual block
+     * @param grid
+     * @param startRowIndex
+     * @param startColumnIndex
+     * @return @boolean
+     */
+     private boolean validateBlock(List<List<Integer>> grid, int startRowIndex, int startColumnIndex){
         List<Integer> block = new ArrayList<>();
         boolean checkValidity = true;
         int endRowIndex = startRowIndex + 3;

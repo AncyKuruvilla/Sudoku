@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@ComponentScan({"com.game.sudoku","com.game.scheduler","com.game.email"})
+@ComponentScan({"com.game.sudoku","com.game.sudoku.scheduler","com.game.sudoku.service.email"})
 @SpringBootApplication
 @EnableScheduling
 public class SudokuApplication {

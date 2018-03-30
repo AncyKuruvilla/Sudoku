@@ -19,7 +19,7 @@ public class ValidatorServiceImplTest {
             grid.add(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
         }
 
-        Assert.assertThat(new ValidatorServiceImpl().validateBlock(grid), Matchers.is(false));
+        Assert.assertThat(new ValidatorServiceImpl().validateGrid(grid), Matchers.is(false));
     }
 
 }

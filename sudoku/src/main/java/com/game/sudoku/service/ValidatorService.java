@@ -3,8 +3,13 @@ package com.game.sudoku.service;
 import java.util.List;
 
 /**
- * Created by jino-ancy on 11-03-2018.
+ * Validator Service
  */
 public interface ValidatorService {
+    /**
+     * Checks if the sudoku is valid or not.
+     * @param grid
+     * @return @boolean
+     */
     boolean validateGrid(List<List<Integer>> grid);
 }

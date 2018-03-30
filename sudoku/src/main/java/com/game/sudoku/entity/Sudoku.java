@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
- * Created by ancy on 09-03-2018.
+ * Sudoku
  */
 @Entity
 public class Sudoku {
@@ -27,5 +27,9 @@ public class Sudoku {
 
     public int getId() {
         return Id;
+    }
+
+    public String getSolution() {
+        return solution;
     }
 }

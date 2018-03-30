@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jino-ancy on 20-03-2018.
+ * Sudoku Grid
  */
 public class SudokuGrid {
-    private int solutionID;
+    private int solutionId;
     private List<List<Integer>> solution;
     private List<List<Integer>> puzzle;
 
@@ -32,11 +32,11 @@ public class SudokuGrid {
         this.puzzle = puzzle;
     }
 
-    public int getSolutionID() {
-        return solutionID;
+    public int getSolutionId() {
+        return solutionId;
     }
 
-    public void setSolutionID(int solutionID) {
-        this.solutionID = solutionID;
+    public void setSolutionId(int solutionId) {
+        this.solutionId = solutionId;
     }
 }
