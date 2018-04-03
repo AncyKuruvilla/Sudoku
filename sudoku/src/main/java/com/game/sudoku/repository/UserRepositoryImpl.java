@@ -4,7 +4,6 @@ import com.game.sudoku.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,11 +21,9 @@ public class UserRepositoryImpl implements UserRepository{
     private static Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Override
-    @Transactional(readOnly = true)
     public List<User> getAll() {
         return entityManager.
-                createQuery("Select * from user").
-                getResultList();
+                createQuery("Select u from User u").getResultList();
     }
 
     @Override

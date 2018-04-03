@@ -1,9 +1,14 @@
 package com.game.sudoku.scheduler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.sudoku.entity.Mail;
 import com.game.sudoku.entity.Sudoku;
+import com.game.sudoku.entity.User;
 import com.game.sudoku.model.SudokuGrid;
 import com.game.sudoku.service.GameService;
+import com.game.sudoku.service.UserService;
+import com.game.sudoku.service.email.MailContentService;
 import com.game.sudoku.service.email.MailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Email Scheduler Implementation.
@@ -27,42 +35,66 @@ public class EmailSchedulerImpl implements EmailScheduler {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private MailContentService mailContentService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /**
-     * Send an email with Sudoku puzzle everyday at 9.00 am.
+     * Send an email with Sudoku puzzle everyday.
      */
-    @Scheduled(cron = "0 0 7 * * ?")
+    @Scheduled(cron = "0 0/1 * 1/1 * ?")
     @Override
-    public void sendPuzzel() {
+    public void sendPuzzel(){
         LOGGER.info("Called scheduled task to send the puzzle.");
         //create puzzle
         SudokuGrid sudokuGrid = gameService.create();
         //save solution
         Sudoku sudoku  = gameService.save(sudokuGrid);
+        //get all users
+        List<User> users =  userService.getAll();
         //send mail
-        mailService.send("ancy.kuruvilla@hotmail.com",
-                "Sudoku-Puzzle",
-                sudokuGrid.getPuzzle().toString());
-
+        for(User user: users) {
+            //build content
+            String content = mailContentService.buildPuzzleMail(user,sudokuGrid);
+            mailService.send(user.getEmail(),"Sudoku-Puzzle", content);
+        }
         //store sent mail detail
         mailService.insert(new Mail(LocalDate.now(),gameService.find(sudoku.getId())));
     }
 
     /**
-     * Send sudoku solution everyday at 12.30 pm.
+     * Send sudoku solution everyday.
      */
-    @Scheduled(cron = "0 30 12 * * ?")
+    @Scheduled(cron = "20 0/1 * 1/1 * ?")
     @Override
     public void sendSolution() {
         LOGGER.info("Called scheduled task to send the puzzle.");
         LocalDate date = LocalDate.now();
         //Get solution based on date
         Mail sentMail = mailService.findByDate(date);
-
-        //TODO get all users
-
+        if (sentMail == null) {
+            return;
+        }
+        List<List<Integer>> solution = new ArrayList<List<Integer>>();
+        try {
+            solution.addAll(objectMapper
+                    .readValue(sentMail.getSudoku().getSolution(), new TypeReference<List<List<Integer>>>() {}));
+        } catch (IOException e) {
+            LOGGER.error("Could not read the solution!");
+        }
+        //get all users
+        List<User> users =  userService.getAll();
         //send mail
-        mailService.send("ancy.kuruvilla@hotmail.com",
-                "Sudoku-Solution",
-                sentMail.getSudoku().getSolution());
+        for(User user: users) {
+
+            //build content
+            String content = mailContentService.buildSolutioneMail(user, solution);
+            mailService.send(user.getEmail(),"Sudoku-Solution", content);
+        }
     }
 }

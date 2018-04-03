@@ -17,9 +17,7 @@ public class Sudoku {
     @Column( length = 1000 )
     private String solution;
 
-    public Sudoku(){
-
-    }
+    public Sudoku(){ }
 
     public Sudoku(String solution){
         this.solution = solution;

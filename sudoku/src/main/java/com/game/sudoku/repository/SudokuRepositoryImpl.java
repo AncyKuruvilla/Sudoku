@@ -4,7 +4,6 @@ import com.game.sudoku.entity.Sudoku;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,7 +25,6 @@ public class SudokuRepositoryImpl implements SudokuRepository {
     }
 
     @Override
-    @Transactional
     public Sudoku addOrUpdate(Sudoku sudoku) {
         return entityManager.merge(sudoku);
     }

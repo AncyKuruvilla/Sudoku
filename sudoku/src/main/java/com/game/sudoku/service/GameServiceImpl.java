@@ -1,5 +1,7 @@
 package com.game.sudoku.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.sudoku.entity.Sudoku;
 import com.game.sudoku.model.DifficultyLevel;
 import com.game.sudoku.model.SudokuGrid;
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +32,9 @@ public class GameServiceImpl implements GameService {
     @Autowired
     private ValidatorService validator;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
     public Sudoku find(int Id)
     {
@@ -44,12 +50,13 @@ public class GameServiceImpl implements GameService {
         //if solution created is a valid Vudoku then create a puzzle
         if(validator.validateGrid(sudokuGrid.getSolution()))
         {
-            sudokuGrid = caretePuzzle(sudokuGrid, DifficultyLevel.EASY);
+            sudokuGrid = caretePuzzle(sudokuGrid, DifficultyLevel.MEDIUM);
         }
         return sudokuGrid;
     }
 
     @Override
+    @Transactional
     public Sudoku save(SudokuGrid sudokuGrid){
         //store solution
         return insertNewSolutionInDB(sudokuGrid);
@@ -63,7 +70,7 @@ public class GameServiceImpl implements GameService {
      */
     private SudokuGrid caretePuzzle(SudokuGrid grid, DifficultyLevel level){
         LOGGER.info("Creating puzzle with skipped columns");
-        List<List<Integer>> puzzle = new ArrayList<List<Integer>>(grid.getSolution());
+        List<List<Integer>> puzzle = new ArrayList<List<Integer>>(grid.getSolution().size());
 
         int sudokuSize = grid.getSolution().size() * grid.getSolution().get(0).size();
         List<Integer> skipList = IntStream.rangeClosed(1, sudokuSize/2).map(i -> i < level.getColumnSkipCount()/2 ? 0 : 1).boxed().collect(Collectors.toList());
@@ -80,11 +87,11 @@ public class GameServiceImpl implements GameService {
         int skipCount = 0;
 
         for (List<Integer> row : grid.getSolution()) {
+            List<Integer> pRow = new ArrayList<>(row.size());
             for (int rowIdx = 0; rowIdx < row.size(); rowIdx++) {
-                if (skipList.get(skipCount++) == 0) {
-                    row.set(rowIdx, null);
-                }
+                pRow.add(skipList.get(skipCount++) == 0 ? null : row.get(rowIdx));
             }
+            puzzle.add(pRow);
         }
 
         grid.setPuzzle(puzzle);
@@ -112,7 +119,12 @@ public class GameServiceImpl implements GameService {
      */
     private Sudoku insertNewSolutionInDB(SudokuGrid sudokuGrid) {
         LOGGER.info("Inserting solution in database");
-        String solution = sudokuGrid.getSolution().toString();
+        String solution = null;
+        try {
+            solution = objectMapper.writeValueAsString(sudokuGrid.getSolution());
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Could not store the solution into database!");
+        }
         Sudoku sudoku = new Sudoku(solution);
         return sudokuRepository.addOrUpdate(sudoku);
     }

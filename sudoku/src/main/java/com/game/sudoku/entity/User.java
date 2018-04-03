@@ -17,4 +17,12 @@ public class User {
     public int getId() {
         return Id;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 }

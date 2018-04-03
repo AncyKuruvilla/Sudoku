@@ -28,7 +28,13 @@ public class MailRepositoryImpl implements MailRepository {
 
     @Override
     public Mail findByDate(LocalDate date) {
-        LOGGER.info("Finding send mail detail from DB based on date "+ date);
-        return entityManager.find(Mail.class,date);
+        LOGGER.info("Finding send mail detail from DB based on date " + date);
+        return entityManager
+                .createQuery("Select m from Mail m where m.date = '" + date + "'", Mail.class)
+                .getResultList()
+                .stream()
+                .limit(1)
+                .findFirst()
+                .orElse(null);
     }
 }

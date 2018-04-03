@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * UserController.
+ * User Controller.
  */
 @RestController
 public class UserController {
