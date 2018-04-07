@@ -34,4 +34,11 @@ public class MailContentServiceImpl implements MailContentService{
         context.setVariable("solution", solution);
         return templateEngine.process("solution_mail_template",context);
     }
+
+    @Override
+    public String buildWelcomeMale(User user) {
+        Context context = new Context();
+        context.setVariable("user",user);
+        return templateEngine.process("welcome_template",context);
+    }
 }

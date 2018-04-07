@@ -36,44 +36,62 @@ public class GameServiceImpl implements GameService {
     private ObjectMapper objectMapper;
 
     @Override
-    public Sudoku find(int Id)
-    {
-        return sudokuRepository.findById(Id);
+    public Sudoku find(final int id) {
+        return sudokuRepository.findById(id);
     }
 
     @Override
     public SudokuGrid create() {
         LOGGER.info("Generating sudoku grid.");
-        //Generate new sudoku puzzle
         SudokuGrid sudokuGrid = generateSolution();
-
-        //if solution created is a valid Vudoku then create a puzzle
-        if(validator.validateGrid(sudokuGrid.getSolution()))
-        {
-            sudokuGrid = caretePuzzle(sudokuGrid, DifficultyLevel.MEDIUM);
-        }
+        sudokuGrid = caretePuzzle(sudokuGrid, DifficultyLevel.MEDIUM);
         return sudokuGrid;
     }
 
     @Override
     @Transactional
-    public Sudoku save(SudokuGrid sudokuGrid){
-        //store solution
-        return insertNewSolutionInDB(sudokuGrid);
+    public Sudoku save(SudokuGrid sudokuGrid) {
+        String solution = toJson(sudokuGrid.getSolution());
+        if (solution == null) {
+            throw new IllegalArgumentException("Could not store the solution: "
+                    + sudokuGrid.getSolution() + " into database!");
+        }
+        Sudoku sudoku = new Sudoku(solution);
+        LOGGER.info("Inserting solution in database");
+        return sudokuRepository.addOrUpdate(sudoku);
     }
 
     /**
-     * Creating puzzle by removing random value from the solution
+     * Convert given object into Json.
+     * Package private for testing.
+     */
+    String toJson(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String solution = null;
+        try {
+            solution = objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Could not convert the object: {} into Json.", value);
+        }
+        return solution;
+    }
+
+    /**
+     * Creating puzzle by removing random value from the solution.
+     *
      * @param grid
      * @param level
      * @return @{@link SudokuGrid} object
      */
-    private SudokuGrid caretePuzzle(SudokuGrid grid, DifficultyLevel level){
+    SudokuGrid caretePuzzle(SudokuGrid grid, DifficultyLevel level) {
         LOGGER.info("Creating puzzle with skipped columns");
-        List<List<Integer>> puzzle = new ArrayList<List<Integer>>(grid.getSolution().size());
+        List<List<Integer>> puzzle =
+                new ArrayList<List<Integer>>(grid.getSolution().size());
 
         int sudokuSize = grid.getSolution().size() * grid.getSolution().get(0).size();
-        List<Integer> skipList = IntStream.rangeClosed(1, sudokuSize/2).map(i -> i < level.getColumnSkipCount()/2 ? 0 : 1).boxed().collect(Collectors.toList());
+        List<Integer> skipList = IntStream.rangeClosed(1, sudokuSize / 2).map(i -> i < level.getColumnSkipCount() / 2 ? 0 : 1).boxed().collect(Collectors.toList());
         Collections.shuffle(skipList);
 
         List<Integer> reversedSkipList = new ArrayList<>(skipList);
@@ -100,52 +118,33 @@ public class GameServiceImpl implements GameService {
 
     /**
      * Generate a solved grid
+     *
      * @return @{@link SudokuGrid} object
      */
-    private SudokuGrid generateSolution(){
+    SudokuGrid generateSolution() {
         LOGGER.info("Creating solution");
         SudokuGrid sudoku = new SudokuGrid();
-        // base row is generated baed on which the whole gril will be created
         List<Integer> row = generateBaseRow();
-        //fillGrid the grid with value
-        fillGrid(sudoku,row);
+        fillGrid(sudoku, row);
         return sudoku;
     }
 
     /**
-     * Store sudoku solution in DB
-     * @param sudokuGrid
-     * @return @{@link Sudoku} object
-     */
-    private Sudoku insertNewSolutionInDB(SudokuGrid sudokuGrid) {
-        LOGGER.info("Inserting solution in database");
-        String solution = null;
-        try {
-            solution = objectMapper.writeValueAsString(sudokuGrid.getSolution());
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Could not store the solution into database!");
-        }
-        Sudoku sudoku = new Sudoku(solution);
-        return sudokuRepository.addOrUpdate(sudoku);
-    }
-
-    /**
      * sudoku grid is populated with appropriate value
+     *
      * @param sudoku
      * @param row
      */
-    private void fillGrid(SudokuGrid sudoku, List<Integer> row){
+    private void fillGrid(SudokuGrid sudoku, List<Integer> row) {
         LOGGER.info("Filling sudoku solution grid");
         List<List<Integer>> grid = sudoku.getSolution();
-        //the base row need to be shuffeled after populating 3 rows
-        for(int counter=0;counter<9;counter++){
-            if(counter!=0 && counter%3 == 0) {
+        for (int counter = 0; counter < 9; counter++) {
+            if (counter != 0 && counter % 3 == 0) {
                 row = shuffleRow(row);
             }
             List<Integer> newRow = new ArrayList<>();
             newRow.addAll(row);
             grid.add(newRow);
-            //base row need to be roated for each new row
             rotateRow(row);
         }
     }
@@ -153,12 +152,13 @@ public class GameServiceImpl implements GameService {
     /**
      * Generate the base row
      * Based on the base row the whole Sudoku Grid will be generated
+     *
      * @return @{@link List<Integer>}
      */
-    private List<Integer> generateBaseRow(){
+    private List<Integer> generateBaseRow() {
         LOGGER.info("Generating base row");
-        List<Integer> row = IntStream.range(1, 10)  // creates a stream of ints
-                .boxed()        // converts them to Integers
+        List<Integer> row = IntStream.range(1, 10)
+                .boxed()
                 .collect(Collectors.toList());
         Collections.shuffle(row);
         return row;
@@ -167,40 +167,43 @@ public class GameServiceImpl implements GameService {
     /**
      * The element position should not match with the old position
      * In this method the row is rotated with distance of 3
+     *
      * @param baseRow
      */
-    private void rotateRow(List<Integer> baseRow){
+    private void rotateRow(List<Integer> baseRow) {
         LOGGER.info("Rotating the value of row to distance of 3");
-        Collections.rotate(baseRow,3);
+        Collections.rotate(baseRow, 3);
     }
 
 
     /**
      * Shuffel each group of 3 element in such a way
      * that the position doesnt match the previous row
+     *
      * @param baseRow
      * @return @{@link List<Integer>}
      */
-    private List<Integer> shuffleRow(List<Integer> baseRow){
+    private List<Integer> shuffleRow(List<Integer> baseRow) {
         LOGGER.info("Shuffleing every 3 element of the row");
         List<Integer> shuffledRow = new ArrayList<>();
-        shuffledRow.addAll(splitNshuffelRow(0,3,baseRow));
-        shuffledRow.addAll(splitNshuffelRow(3,6,baseRow));
-        shuffledRow.addAll(splitNshuffelRow(6,9,baseRow));
+        shuffledRow.addAll(splitNshuffelRow(0, 3, baseRow));
+        shuffledRow.addAll(splitNshuffelRow(3, 6, baseRow));
+        shuffledRow.addAll(splitNshuffelRow(6, 9, baseRow));
         return shuffledRow;
     }
 
     /**
      * Spliting the list with 3 element
      * and rotating it with distance 1
+     *
      * @param fromIndex
      * @param toIndex
      * @param baseRow
      * @return @{@link List<Integer>}
      */
-    private List<Integer> splitNshuffelRow(int fromIndex, int toIndex, List<Integer> baseRow){
-        List<Integer> subList = baseRow.subList(fromIndex,toIndex);
-        Collections.rotate(subList,1);
+    private List<Integer> splitNshuffelRow(int fromIndex, int toIndex, List<Integer> baseRow) {
+        List<Integer> subList = baseRow.subList(fromIndex, toIndex);
+        Collections.rotate(subList, 1);
         return subList;
     }
 }

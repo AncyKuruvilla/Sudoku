@@ -31,13 +31,13 @@ public class ValidatorServiceImpl implements ValidatorService {
                 return false;
             }
         }
-        return true;
+        return validateBlock(grid);
     }
 
     /**
-     * Validating Row.
+     * Validating Rows and columns.
      * Check if the row contain value from 1-9 and
-     * also check if row contain unique values.
+     * also check if row/columns contain unique values.
      * @param row
      * @return @boolean
      */
@@ -50,7 +50,6 @@ public class ValidatorServiceImpl implements ValidatorService {
         int sum = row.stream().filter(value -> value < 10 && value > 0)
                 .distinct().limit(row.size())
                 .reduce(0, Integer::sum);
-        System.out.print(" ");
         return sum == 45;
     }
 

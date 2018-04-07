@@ -13,7 +13,6 @@ import com.game.sudoku.service.email.MailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class EmailSchedulerImpl implements EmailScheduler {
     /**
      * Send an email with Sudoku puzzle everyday.
      */
-    @Scheduled(cron = "0 0/1 * 1/1 * ?")
+    //@Scheduled(cron = "0 0/1 * 1/1 * ?")
     @Override
     public void sendPuzzel(){
         LOGGER.info("Called scheduled task to send the puzzle.");
@@ -70,7 +69,7 @@ public class EmailSchedulerImpl implements EmailScheduler {
     /**
      * Send sudoku solution everyday.
      */
-    @Scheduled(cron = "20 0/1 * 1/1 * ?")
+    //@Scheduled(cron = "20 0/1 * 1/1 * ?")
     @Override
     public void sendSolution() {
         LOGGER.info("Called scheduled task to send the puzzle.");

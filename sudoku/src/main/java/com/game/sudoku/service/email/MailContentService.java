@@ -24,4 +24,11 @@ public interface MailContentService {
      * @return mail content
      */
     String buildSolutioneMail(User user, List<List<Integer>> solution);
+
+    /**
+     * Create content of the welcome mail.
+     * @param user
+     * @return welcome mail content
+     */
+    String buildWelcomeMale(User user);
 }
